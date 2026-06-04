@@ -1,11 +1,10 @@
 google-genai
+deepgram-sdk
+elevenlabs
+
 python-dotenv
-
-faster-whisper
-
 sounddevice
 numpy
 
-pyttsx3
-
 rich
+scipy
