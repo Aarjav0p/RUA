@@ -1,0 +1,11 @@
+google-genai
+python-dotenv
+
+faster-whisper
+
+sounddevice
+numpy
+
+pyttsx3
+
+rich
