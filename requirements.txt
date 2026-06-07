@@ -1,0 +1,25 @@
+# ─────────────────────────────────────────────────────────────
+#  RUA — Phase 1 · Python 3.14 compatible dependencies
+#  Install: pip install -r requirements.txt
+# ─────────────────────────────────────────────────────────────
+
+# Core LLM — Google Gemini (new unified SDK)
+google-genai
+
+# Backup LLM + Whisper STT — Groq
+groq
+
+# Microphone input — PortAudio wrapper (bundles PortAudio on Windows)
+sounddevice
+
+# Audio array processing (energy-based voice activity detection)
+numpy
+
+# Text-to-speech — Microsoft Edge Neural voices (free, no API key)
+edge-tts
+
+# Audio playback — lightweight MP3/WAV/FLAC decoder + player (~1 MB)
+miniaudio
+
+# Environment variable loader (.env file support)
+python-dotenv

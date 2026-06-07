@@ -1,2 +1,5 @@
 .env
 test.py
+SETUP.md
+.vscode
+__pycache__
