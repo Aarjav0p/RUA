@@ -3,10 +3,7 @@
 #  Install: pip install -r requirements.txt
 # ─────────────────────────────────────────────────────────────
 
-# Core LLM — Google Gemini (new unified SDK)
-google-genai
-
-# Backup LLM + Whisper STT — Groq
+# LLM (GPT-OSS-120B) + Whisper STT — Groq
 groq
 
 # Microphone input — PortAudio wrapper (bundles PortAudio on Windows)

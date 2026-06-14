@@ -1,12 +1,11 @@
-from google import genai
-from google.genai import types
+from groq import Groq
 from dotenv import load_dotenv
 import os
 load_dotenv()
 
 NAME = "Rua"
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = "gemini-3.5-flash"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_MODEL = "openai/gpt-oss-120b"
 
 EXIT_WORDS = ["exit", "leave", "quit", "shutdown"]
 SHUTDOWN_KEYWORD = "[SHUTDOWN]"
@@ -20,25 +19,29 @@ You are helpful, witty, precise, and concise. Your responses are spoken aloud, s
 - Occasionally address the user as "sir" in the JARVIS style, but don't overdo it.
 - If the user says goodbye, tells you to go to sleep, rest, shut down, take a break, or anything that signals the end of the conversation, respond with a warm farewell and append the exact text {SHUTDOWN_KEYWORD} at the very end of your response. Only append this when the user is clearly ending the session."""
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+client = Groq(api_key=GROQ_API_KEY)
 
-gemini_chat = client.chats.create(
-    model=GEMINI_MODEL,
-    config=types.GenerateContentConfig(
-        system_instruction=SYSTEM_PROMPT,
-        temperature=0.7,
-        # max_output_tokens=300,
-    )
-)
+# Maintain conversation history manually (OpenAI-compatible format)
+chat_history = [{"role": "system", "content": SYSTEM_PROMPT}]
 
 
-def ask_gemini(user_input: str) -> str | None:
-    """Send message to Gemini chat session, return reply or None on error."""
+def ask_llm(user_input: str) -> str | None:
+    """Send message to Groq chat, return reply or None on error."""
+    chat_history.append({"role": "user", "content": user_input})
     try:
-        response = gemini_chat.send_message(user_input)
-        return response.text.strip()
+        response = client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=chat_history,
+            temperature=0.7,
+            # max_tokens=300,
+        )
+        reply = response.choices[0].message.content.strip()
+        chat_history.append({"role": "assistant", "content": reply})
+        return reply
     except Exception as e:
-        print(f"[Gemini Error]  {e}")
+        print(f"[Groq Error]  {e}")
+        # Remove the failed user message so history stays consistent
+        chat_history.pop()
         return None
 
 
@@ -50,15 +53,13 @@ def main():
         
         if (req.lower() in EXIT_WORDS):
             print(f"Goodbye boss. Shutting down...")
-            client.close()
             break
         
-        response = ask_gemini(req)
+        response = ask_llm(req)
         
         if response and SHUTDOWN_KEYWORD in response:
             response = response.replace(SHUTDOWN_KEYWORD, "").strip()
             print(f"{NAME}\t: {response}")
-            client.close()
             break
         
         print(f"{NAME}\t: {response}")
