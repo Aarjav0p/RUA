@@ -1,11 +1,12 @@
 from groq import Groq
+from openai import OpenAI
 from dotenv import load_dotenv
 import os
 load_dotenv()
 
 NAME = "Rua"
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = "openai/gpt-oss-120b"
+LLM_API_KEY = os.getenv("NVIDIA_API_KEY")
+LLM_MODEL = "openai/gpt-oss-120b"
 
 EXIT_WORDS = ["exit", "leave", "quit", "shutdown"]
 SHUTDOWN_KEYWORD = "[SHUTDOWN]"
@@ -19,27 +20,33 @@ You are helpful, witty, precise, and concise. Your responses are spoken aloud, s
 - Occasionally address the user as "sir" in the JARVIS style, but don't overdo it.
 - If the user says goodbye, tells you to go to sleep, rest, shut down, take a break, or anything that signals the end of the conversation, respond with a warm farewell and append the exact text {SHUTDOWN_KEYWORD} at the very end of your response. Only append this when the user is clearly ending the session."""
 
-client = Groq(api_key=GROQ_API_KEY)
+client = OpenAI(
+  base_url = "https://integrate.api.nvidia.com/v1",
+  api_key = LLM_API_KEY
+)
+
 
 # Maintain conversation history manually (OpenAI-compatible format)
 chat_history = [{"role": "system", "content": SYSTEM_PROMPT}]
 
 
 def ask_llm(user_input: str) -> str | None:
-    """Send message to Groq chat, return reply or None on error."""
+    """Send message to LLM chat, return reply or None on error."""
     chat_history.append({"role": "user", "content": user_input})
     try:
         response = client.chat.completions.create(
-            model=GROQ_MODEL,
+            model=LLM_MODEL,
             messages=chat_history,
             temperature=0.7,
             # max_tokens=300,
+            # tools=tools
+            # tool_choice=auto
         )
         reply = response.choices[0].message.content.strip()
         chat_history.append({"role": "assistant", "content": reply})
         return reply
     except Exception as e:
-        print(f"[Groq Error]  {e}")
+        print(f"[LLM Error]  {e}")
         # Remove the failed user message so history stays consistent
         chat_history.pop()
         return None
